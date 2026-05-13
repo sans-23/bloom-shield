@@ -1,0 +1,14 @@
+services:
+  valkey:
+    image: valkey/valkey:latest
+    ports:
+      - "8081:8081"
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: bloom
+      POSTGRES_PASSWORD: bloom
+      POSTGRES_DB: bloom_db
+    ports:
+      - "5432:5432"
