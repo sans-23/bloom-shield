@@ -17,5 +17,12 @@ public class LookupController {
             "status", "up"
         );
     }
+
+    @GetMapping("/hi")
+    public Map<String, Object> hi() {
+        return Map.of(
+            "status", "hi"
+        );
+    }
     
 }
