@@ -9,8 +9,7 @@ import requests
 def test_performance():
     url = "http://localhost:8080/api/register-user"
     payload = {
-        "filterType": "ip",
-        "filterValue": ""
+        "user_name": "ip"
     }
     response = requests.get(url, json=payload)
     print(f"Status Code: {response.status_code}")
