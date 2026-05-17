@@ -1,13 +1,14 @@
 package com.bloomshield.filter;
 
-public class BloomFilter {
+public class BloomFilter implements Filter {
     
     private final boolean[] bitArray;
     private final int bitSize;
     private final int hashCount;
     private int insertedCount;
+    private final String name = "bf";
 
-    BloomFilter(int bitSize, int hashCount){
+    public BloomFilter(int bitSize, int hashCount){
         this.bitSize = bitSize;
         this.bitArray = new boolean[bitSize];
         this.insertedCount = 0;
@@ -30,9 +31,18 @@ public class BloomFilter {
         return true;
     }
 
-    int[] getHashes(String Key){
+    public int[] getHashes(String key) {
         int[] pos = new int[hashCount];
-        // hashing logic here
+        for (int i = 0; i < hashCount; i++) {
+            // using built in hashCode() of String and bitwise AND to ensure positive index
+            String toHash = key + i;
+            int hash = toHash.hashCode();
+            pos[i] = (hash & 0x7fffffff) % bitSize;
+        }
         return pos;
+    }
+
+    public String getName() {
+        return name;
     }
 }

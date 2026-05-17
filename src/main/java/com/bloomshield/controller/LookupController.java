@@ -7,6 +7,7 @@ import com.bloomshield.model.User;
 import com.bloomshield.service.LookupService;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import java.util.Map;
@@ -42,10 +43,23 @@ public class LookupController {
         return ResponseEntity.ok(Map.of("status", "user-created"));
     }
 
+    @GetMapping("/user/{userName}")
+    public ResponseEntity<Map<String, Object>> getUser(@PathVariable("userName") String userName) {
+        long startTime = System.nanoTime();
+        boolean success = lookupService.checkIfUserExits(userName);
+        if (!success) {
+            long endTime = System.nanoTime();
+            long timeElapsed = endTime - startTime;
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", "user not found", "time_elapsed", timeElapsed));
+        }
+        long endTime = System.nanoTime();
+        long timeElapsed = endTime - startTime;
+        return ResponseEntity.ok(Map.of("status", "user found", "time_elapsed", timeElapsed));
+    }
+
     @GetMapping("/list-users")
     public List<User> userlist() {
         return lookupService.listUsers();
     }
-    
-    
 }
