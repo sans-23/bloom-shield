@@ -15,7 +15,7 @@ public class LookupService {
     }
     
     public boolean checkIfUserExits(String user){
-        User u = userRepository.findByUser_name(user);
+        User u = userRepository.findByUserName(user);
         return u!=null;
     }
 

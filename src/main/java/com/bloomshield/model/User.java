@@ -16,9 +16,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    String user_name;
+    String userName;
 
-    public User(String user_name){
-        this.user_name = user_name;
+    public User(String userName){
+        this.userName = userName;
     }
 }

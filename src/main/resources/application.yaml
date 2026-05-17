@@ -7,7 +7,7 @@ spring:
     name: bloom-shield
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/mydatabase
+    url: jdbc:postgresql://localhost:5432/bloom_db
     username: bloom
     password: bloom
     driver-class-name: org.postgresql.Driver

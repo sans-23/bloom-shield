@@ -4,5 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.bloomshield.model.User;
 
 public interface UserRepository extends JpaRepository<User, String>{
-    User findByUser_name(String user_name);
+    // Using camelCase to avoid Spring Data JPA confusing underscores with nested property traversal
+    User findByUserName(String userName);
 }
