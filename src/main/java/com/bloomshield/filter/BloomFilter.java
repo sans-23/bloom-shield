@@ -1,13 +1,38 @@
 package com.bloomshield.filter;
 
-import java.util.ArrayList;
-
 public class BloomFilter {
-    public int size = 10000000;
-    ArrayList<Integer> slots;
+    
+    private final boolean[] bitArray;
+    private final int bitSize;
+    private final int hashCount;
+    private int insertedCount;
 
-    BloomFilter(int size){
-        this.size = size;
-        slots = new ArrayList<>(size);
+    BloomFilter(int bitSize, int hashCount){
+        this.bitSize = bitSize;
+        this.bitArray = new boolean[bitSize];
+        this.insertedCount = 0;
+        this.hashCount = hashCount;
+    }
+
+    public void add(String key){
+        int[] hashes = getHashes(key);
+        for(int hash: hashes) {
+            bitArray[hash] = true;
+        }
+        insertedCount++;
+    }
+
+    public boolean mightContain(String key){
+        int[] hashes = getHashes(key);
+        for(int hash: hashes){
+            if(!bitArray[hash]) return false;
+        }
+        return true;
+    }
+
+    int[] getHashes(String Key){
+        int[] pos = new int[hashCount];
+        // hashing logic here
+        return pos;
     }
 }
