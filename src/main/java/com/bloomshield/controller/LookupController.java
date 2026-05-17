@@ -3,12 +3,17 @@ package com.bloomshield.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bloomshield.model.User;
 import com.bloomshield.service.LookupService;
 
 import org.springframework.web.bind.annotation.GetMapping;
 
-
+import java.util.List;
 import java.util.Map;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
 
 @RestController
 @RequestMapping("/api")
@@ -28,11 +33,19 @@ public class LookupController {
     }
 
     @GetMapping("/register-user")
-    public Map<String, Object> registerUser(String user_name) {
-        lookupService.registerUser(user_name);
-        return Map.of(
-            "status", "user-created"
-        );
+    public ResponseEntity<Map<String, Object>> registerUser(@RequestParam("userName") String userName) {
+        boolean success = lookupService.registerUser(userName);
+        if (!success) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", "user already exists"));
+        }
+        return ResponseEntity.ok(Map.of("status", "user-created"));
     }
+
+    @GetMapping("/list-users")
+    public List<User> userlist() {
+        return lookupService.listUsers();
+    }
+    
     
 }

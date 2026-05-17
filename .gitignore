@@ -1,6 +1,8 @@
 .DS_Store
 *.log
 
+venv/
+
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar

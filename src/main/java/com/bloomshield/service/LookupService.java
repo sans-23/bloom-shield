@@ -1,5 +1,7 @@
 package com.bloomshield.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.bloomshield.model.User;
@@ -24,5 +26,9 @@ public class LookupService {
         User u = new User(user);
         userRepository.save(u);
         return true;
+    }
+
+    public List<User> listUsers(){
+        return userRepository.findAll();
     }
 }
