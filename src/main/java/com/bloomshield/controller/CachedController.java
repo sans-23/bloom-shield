@@ -41,6 +41,10 @@ public class CachedController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", "user not found in db", "time_elapsed", timeElapsed));
         }
+        
+        // Cache the successful DB lookup!
+        redisCache.put(userName, "exists");
+        
         long endTime = System.nanoTime();
         long timeElapsed = endTime - startTime;
         return ResponseEntity.ok(Map.of("status", "user found in db", "time_elapsed", timeElapsed));

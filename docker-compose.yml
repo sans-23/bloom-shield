@@ -2,7 +2,7 @@ services:
   valkey:
     image: valkey/valkey:latest
     ports:
-      - "8081:8081"
+      - "6379:6379"
 
   postgres:
     image: postgres:latest
