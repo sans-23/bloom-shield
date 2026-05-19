@@ -46,25 +46,39 @@ def test_scenario(name, url_template, users, description):
     print(f"Avg Latency: {avg_latency:.2f} ms")
     print(f"P95 Latency: {p95_latency:.2f} ms")
 
-def test_performance():
-    # Scenario A: 1000 Valid Users (Tests Cache Hits & Filter overhead)
-    # Assuming user_0 to user_999 were created previously
-    valid_users = [f"user_{i}" for i in range(1000)]
+def test_performance(invalid_percent):
+    # Number of total queries to simulate
+    NUM_QUERIES = 20000
     
-    # Scenario B: 1000 Invalid Users (Tests Cache Penetration & DB protection)
-    invalid_users = [f"missing_user_{i}" for i in range(1000)]
+    # We want a high rate of repetition to show cache effects.
+    # We pick from a pool of 100 unique users, querying each ~20 times.
+    UNIQUE_POOL_SIZE = 100
     
-    print("=========================================")
-    print("SCENARIO A: VALID USERS (CACHE WARM-UP)")
-    print("=========================================")
-    for name, url_template in BASE_URLS.items():
-        test_scenario(name, url_template, valid_users, "1000 Existing Users")
-        
+    # Assuming user_0 to user_{UNIQUE_POOL_SIZE-1} exist in the DB
+    valid_pool = [f"user_{i}" for i in range(UNIQUE_POOL_SIZE)]
+    # These users do not exist in the DB
+    invalid_pool = [f"missing_user_{i}" for i in range(UNIQUE_POOL_SIZE)]
+    
+    import random
+    random.seed(42) # For reproducible results
+    
+    # Mixed "Real-World" Traffic
+    num_invalid = int((invalid_percent / 100.0) * NUM_QUERIES)
+    num_valid = NUM_QUERIES - num_invalid
+    mixed_queries = [random.choice(valid_pool) for _ in range(num_valid)] + [random.choice(invalid_pool) for _ in range(num_invalid)]
+    random.shuffle(mixed_queries)
+
     print("\n=========================================")
-    print("SCENARIO B: INVALID USERS (CACHE PENETRATION)")
+    print(f"REAL-WORLD MIXED TRAFFIC - {NUM_QUERIES} queries ({invalid_percent}% invalid)")
     print("=========================================")
     for name, url_template in BASE_URLS.items():
-        test_scenario(name, url_template, invalid_users, "1000 Non-Existing Users")
+        test_scenario(name, url_template, mixed_queries, f"{NUM_QUERIES} Mixed Queries")
 
 if __name__ == "__main__":
-    test_performance()
+    import argparse
+    parser = argparse.ArgumentParser(description='Run Bloom-Shield performance benchmarks.')
+    parser.add_argument('--invalid-percent', type=float, default=20.0,
+                        help='Percentage of queries that are for invalid users (default: 20.0)')
+    args = parser.parse_args()
+    
+    test_performance(args.invalid_percent)

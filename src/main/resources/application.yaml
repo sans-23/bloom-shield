@@ -1,8 +1,8 @@
 bloomshield:
   filter:
     type: standard # options: standard, counting
-    bit-size: 100000
-    hash-count: 3
+    bit-size: 10000000
+    hash-count: 7
   cache:
     ttl-seconds: 3600 # Time to live for cache entries in seconds
 
