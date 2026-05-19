@@ -19,6 +19,9 @@ public class MetricsService {
         private final Timer apiLatencyTimer; // (baseline)
         private final Timer apiV1LatencyTimer; // with cache
         private final Timer apiV2LatencyTimer; // with bloom filter
+        private final Timer redisGetLatencyTimer;
+        private final Timer redisPutLatencyTimer;
+        private final Timer dbQueryLatencyTimer;
 
         public MetricsService(MeterRegistry meterRegistry){
             this.meterRegistry = meterRegistry;
@@ -45,6 +48,18 @@ public class MetricsService {
                 .description("Request latency for /api/v2 - with cache + Bloom filter")
                 .tag("controller", "filtered")
                 .register(meterRegistry);
+
+            this.redisGetLatencyTimer = Timer.builder("redis.get.latency")
+                .description("Redis get latency")
+                .register(meterRegistry);
+
+            this.redisPutLatencyTimer = Timer.builder("redis.put.latency")
+                .description("Redis put latency")
+                .register(meterRegistry);
+
+            this.dbQueryLatencyTimer = Timer.builder("db.query.latency")
+            .description("DB Query latency")
+            .register(meterRegistry);    
         }
 
         public void recordCacheHit(){
@@ -83,5 +98,17 @@ public class MetricsService {
 
         public void recordApiV2Latency(long nanoSeconds) {
             apiV2LatencyTimer.record(java.time.Duration.ofNanos(nanoSeconds));
+        }
+
+        public void recordRedisGetLatency(long nanoSeconds){
+            redisGetLatencyTimer.record(java.time.Duration.ofNanos(nanoSeconds));
+        }
+
+        public void recordRedisPutLatency(long nanoSeconds){
+            redisPutLatencyTimer.record(java.time.Duration.ofNanos(nanoSeconds));
+        }
+
+        public void recordDbQueryLatency(long nanoSeconds){
+            dbQueryLatencyTimer.record(java.time.Duration.ofNanos(nanoSeconds));
         }
 }

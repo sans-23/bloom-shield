@@ -9,6 +9,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+grafana_data
+prometheus_data
+
 ### STS ###
 .apt_generated
 .classpath
