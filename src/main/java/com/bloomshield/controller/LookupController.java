@@ -3,6 +3,7 @@ package com.bloomshield.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bloomshield.metrics.MetricsService;
 import com.bloomshield.model.User;
 import com.bloomshield.service.LookupService;
 
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.List;
 import java.util.Map;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -21,6 +23,9 @@ import org.springframework.http.ResponseEntity;
 public class LookupController {
 
     private final LookupService lookupService;
+
+    @Autowired
+    private MetricsService metricsService;
 
     public LookupController(LookupService lookupService){
         this.lookupService = lookupService;
@@ -50,11 +55,13 @@ public class LookupController {
         if (!success) {
             long endTime = System.nanoTime();
             long timeElapsed = endTime - startTime;
+            metricsService.recordApiLatency(timeElapsed);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", "user not found", "time_elapsed", timeElapsed));
         }
         long endTime = System.nanoTime();
         long timeElapsed = endTime - startTime;
+        metricsService.recordApiLatency(timeElapsed);
         return ResponseEntity.ok(Map.of("status", "user found", "time_elapsed", timeElapsed));
     }
 
