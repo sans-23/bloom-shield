@@ -52,16 +52,19 @@ public class LookupController {
     public ResponseEntity<Map<String, Object>> getUser(@PathVariable("userName") String userName) {
         long startTime = System.nanoTime();
         boolean success = lookupService.checkIfUserExits(userName);
+        metricsService.recordDbHit();
         if (!success) {
             long endTime = System.nanoTime();
             long timeElapsed = endTime - startTime;
             metricsService.recordApiLatency(timeElapsed);
+            metricsService.getInvalidRequestCount();
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", "user not found", "time_elapsed", timeElapsed));
         }
         long endTime = System.nanoTime();
         long timeElapsed = endTime - startTime;
         metricsService.recordApiLatency(timeElapsed);
+        metricsService.recordValidRequest();
         return ResponseEntity.ok(Map.of("status", "user found", "time_elapsed", timeElapsed));
     }
 

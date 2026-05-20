@@ -42,6 +42,7 @@ public class FilteredController {
             long endTime = System.nanoTime();
             long timeElapsed = endTime - startTime;
             metricsService.recordApiV2Latency(timeElapsed);
+            metricsService.recordInvalidRequest();
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", "user not found in bloom filter", "time_elapsed", timeElapsed));
         }
@@ -52,16 +53,20 @@ public class FilteredController {
             long endTime = System.nanoTime();
             long timeElapsed = endTime - startTime;
             metricsService.recordApiV2Latency(timeElapsed);
+            metricsService.recordValidRequest();
             return ResponseEntity.ok(Map.of("status", "user found in cache", "time_elapsed", timeElapsed));
         }
 
         metricsService.recordCacheMiss();
         
         boolean success = lookupService.checkIfUserExits(userName);
+        metricsService.recordDbHit();
         if (!success) {
             long endTime = System.nanoTime();
             long timeElapsed = endTime - startTime;
             metricsService.recordApiV2Latency(timeElapsed);
+            metricsService.recordBloomFilterFalsePositive();
+            metricsService.recordInvalidRequest();
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", "user not found in db", "time_elapsed", timeElapsed));
         }
@@ -72,6 +77,7 @@ public class FilteredController {
         long endTime = System.nanoTime();
         long timeElapsed = endTime - startTime;
         metricsService.recordApiV2Latency(timeElapsed);
+        metricsService.recordValidRequest();
         return ResponseEntity.ok(Map.of("status", "user found in db", "time_elapsed", timeElapsed));
     }
 }

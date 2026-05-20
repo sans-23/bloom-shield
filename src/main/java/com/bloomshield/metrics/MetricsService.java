@@ -3,6 +3,7 @@ package com.bloomshield.metrics;
 import org.springframework.stereotype.Service;
 
 import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 
@@ -14,12 +15,16 @@ public class MetricsService {
         //counters
         private final Counter cacheHitsCounter;
         private final Counter cacheMissesCounter;
+        private final Counter dbHitsCounter;
+        private final Counter bloomFilterFalsePositiveCounter;
+        private final Counter validRequestCounter;
+        private final Counter invalidRequestCounter;
 
         //timers
         private final Timer apiLatencyTimer; // (baseline)
         private final Timer apiV1LatencyTimer; // with cache
         private final Timer apiV2LatencyTimer; // with bloom filter
-        private final Timer redisGetLatencyTimer;
+        private final Timer redisGetLatencyTimer; 
         private final Timer redisPutLatencyTimer;
         private final Timer dbQueryLatencyTimer;
 
@@ -33,7 +38,23 @@ public class MetricsService {
             this.cacheMissesCounter = Counter.builder("cache.misses.total")
                 .description("Total number of cache misses")
                 .register(meterRegistry);
+
+            this.dbHitsCounter = Counter.builder("db.hits.total")
+                .description("Total number of queries hit the db")
+                .register(meterRegistry);
+
+            this.bloomFilterFalsePositiveCounter = Counter.builder("bloom.filter.false_positives.total")
+                .description("Total false positives from Bloom filter (invalid user passed filter but missing from DB)")
+                .register(meterRegistry);
+                
+            this.validRequestCounter =  Counter.builder("request.valid.total")
+                .description("Total requests with valid users")
+                .register(meterRegistry);   
             
+            this.invalidRequestCounter = Counter.builder("request.invalid.total")
+                .description("Total requests with invalid users")
+                .register(meterRegistry);
+                
             this.apiLatencyTimer = Timer.builder("request.latency")
                 .description("Request latencynfor api - baseline")
                 .tag("controller", "lookup")
@@ -59,7 +80,12 @@ public class MetricsService {
 
             this.dbQueryLatencyTimer = Timer.builder("db.query.latency")
             .description("DB Query latency")
-            .register(meterRegistry);    
+            .register(meterRegistry);
+            
+            Gauge.builder("cache.hit.rate", this, value -> calculateCacheHitRate())
+                .description("Cache hit rate")
+                    .register(meterRegistry);
+
         }
 
         public void recordCacheHit(){
@@ -86,6 +112,38 @@ public class MetricsService {
             if(total==0.0) return 0.0;
 
             return (hits/total)*100.0;
+        }
+
+        public void recordDbHit(){
+            dbHitsCounter.increment();
+        }
+
+        public double getDbHitCount(){
+            return dbHitsCounter.count();
+        }
+        
+        public void recordBloomFilterFalsePositive(){
+            bloomFilterFalsePositiveCounter.increment();
+        }
+
+        public void recordValidRequest(){
+            validRequestCounter.increment();
+        }
+
+        public void recordInvalidRequest(){
+            invalidRequestCounter.increment();
+        }
+
+        public double getBloomFilterFalsePositiveCount(){
+            return bloomFilterFalsePositiveCounter.count();
+        }
+
+        public double getValidRequestCount(){
+            return validRequestCounter.count();
+        }
+
+        public double getInvalidRequestCount(){
+            return invalidRequestCounter.count();
         }
 
         public void recordApiLatency(long nanoSeconds){
